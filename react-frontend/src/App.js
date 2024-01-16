@@ -3,6 +3,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import { NavLink } from 'react-router-dom';
 import { Home } from "./Home";
 import { Landing } from "./Landing";
+import { Registration } from "./Registration";
 import { ProtectedRoute } from "./utils/ProtectedRoute";
 import { fakeAuth } from "./utils/FakeAuth";
 import { useAuth } from "./context/AuthProvider";
@@ -31,7 +32,8 @@ const App = () => {
       <Routes>
         <Route index element={<Home onLogin={handleLogin} />} />
         <Route path="landing" element={<ProtectedRoute> <Landing /> </ProtectedRoute>} />
-        <Route path="home" element={ <Home onLogin={handleLogin} />} /> 
+        <Route path="home" element={ <Home onLogin={handleLogin} />} />
+        <Route path="registration" element={<Registration />} />
         <Route path="*" element={<p>There's nothing here: 404!</p>} />
       </Routes>
     </AuthProvider>
@@ -45,6 +47,7 @@ const Navigation = () => {
       <nav>
         <NavLink to="/home">Home</NavLink>
         <NavLink to="/landing">Landing</NavLink>
+        <NavLink to="/registration">Registration</NavLink>
         {value.token && (
           <button type="button" onClick={value.onLogout}>
             Sign Out

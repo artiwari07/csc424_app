@@ -1,21 +1,34 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import { fakeAuth } from "./utils/FakeAuth";
+import { useAuth } from "./context/AuthProvider";
 import axios from "axios";
 
 export const Home = () => {
     const navigate = useNavigate();
+    const [token, setToken] = useState(null);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loginError, setLoginError] = useState("");
 
+    const { value } = useAuth();
+
     const handleLogin = async () => {
         try {
-            await axios.post("http://localhost:8000/account/login", { userid: username, password });
-            console.log("Login successful");
-            navigate("/landing");
-            console.log("After navigation");
+            const response = await axios.post("http://localhost:8000/account/login", { userid: username, password });
+    
+            if (response.data.success) {
+                const token = await fakeAuth();
+                value.onLogin(token);
+                console.log("Login successful");
+                navigate("/landing");
+                console.log("After navigation");
+            } else {
+                setLoginError("Invalid username or password. Please try again.");
+            }
         } catch (error) {
-            setLoginError("Invalid username or password. Please try again.");
+            console.error("Error during login:", error);
+            setLoginError("An error occurred during login. Please try again.");
         }
     };
 
