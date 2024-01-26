@@ -12,25 +12,13 @@ export const Home = () => {
     const [loginError, setLoginError] = useState("");
 
     const { value } = useAuth();
-
-    const handleLogin = async () => {
-        try {
-            const response = await axios.post("http://localhost:8000/account/login", { userid: username, password });
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        value.username = username;
+        value.password = password;
+        return value.onLogin();
+    }
     
-            if (response.data.success) {
-                const token = await fakeAuth();
-                value.onLogin(token);
-                console.log("Login successful");
-                navigate("/landing");
-                console.log("After navigation");
-            } else {
-                setLoginError("Invalid username or password. Please try again.");
-            }
-        } catch (error) {
-            console.error("Error during login:", error);
-            setLoginError("An error occurred during login. Please try again.");
-        }
-    };
 
     return (
         <>
@@ -53,7 +41,7 @@ export const Home = () => {
                 />
             </label>
             <br />
-            <button type="button" onClick={handleLogin}>
+            <button type="submit" onClick={handleSubmit}>
                 Sign In
             </button>
             {loginError && <p>{loginError}</p>}
