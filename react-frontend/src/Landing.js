@@ -1,22 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useAuth } from "./context/AuthProvider";
+import axios from "axios";
 
 export const Landing = () => {
   const { value, dispatch } = useAuth();
   const [cookies, setCookie] = useCookies(["token"]);
+  const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
-    console.log("Checking for stored token...");
+    // Check for the stored token
     const storedToken = cookies.token;
-  
-    console.log("Stored token:", storedToken);
-  
+
     if (storedToken && storedToken.trim() !== "") {
-      console.log("Stored token found. Updating context.");
+      // Update the context with the stored token
       dispatch({ type: "SET_TOKEN", payload: storedToken });
-    } else {
-      console.log("Stored token is empty or undefined. Not updating context.");
+
+      // Fetch contacts using the token
+      fetchContacts(storedToken);
     }
   }, [cookies.token, dispatch]);
 
@@ -26,13 +27,40 @@ export const Landing = () => {
     dispatch({ type: "LOGOUT" });
   };
 
+  const fetchContacts = async (token) => {
+    try {
+      const response = await axios.get("https://localhost:8000/api/contacts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        // Update the contacts state with the fetched data
+        setContacts(response.data.contacts);
+      } else {
+        console.error("Error fetching contacts:", response.data.error);
+      }
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    }
+  };
+
   return (
     <>
       <h2>Landing (Protected)</h2>
       {value.token ? (
         <>
-          <div>Authenticated as {value.token}</div>
-          <button onClick={handleLogout}>Logout</button>
+          {/* <button onClick={handleLogout}>Logout</button> */}
+
+          <div>
+            <h3>List of Users</h3>
+            <ul>
+              {contacts.map((contact) => (
+                <li key={contact._id}>{contact.username}</li>
+              ))}
+            </ul>
+          </div>
         </>
       ) : (
         <div>Not authenticated</div>

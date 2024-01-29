@@ -8,6 +8,7 @@ import userServices from "./models/user-services.js";
 import authenticateToken from "./authMiddleware.js";
 import https from "https";
 import fs from "fs";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 const app = express();
@@ -16,8 +17,8 @@ const port = 8000;
 app.use(express.json());
 app.use(cors());
 
+const saltRounds = 10;
 const secretKey = process.env.TOKEN_SECRET;
-
 const users = [{ username: "bj", password: "pass424" }];
 
 function generateAccessToken(username) {
@@ -25,7 +26,9 @@ function generateAccessToken(username) {
 }
 
 const isStrongPassword = (password) => {
+
   const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
   return regex.test(password);
 };
 
@@ -63,7 +66,6 @@ const startServer = async () => {
               "Password must have at least one capital letter, one number, and one symbol",
           });
         }
-
         // Create a new user in the database (password stored in plain text)
         const newUser = { username, password };
         const savedUser = await userServices.addUser(newUser);
@@ -162,17 +164,19 @@ const startServer = async () => {
       }
     });
 
-    https
-      .createServer(
-        {
-          key: fs.readFileSync("key.pem"),
-          cert: fs.readFileSync("cert.pem"),
-        },
-        app
-      )
-      .listen(8000, () => {
-        console.log("server is runing at port 8000");
-      });
+    
+  https.createServer(
+		// Provide the private and public key to the server by reading each
+		// file's content with the readFileSync() method.
+    {
+      key: fs.readFileSync("key.pem"),
+      cert: fs.readFileSync("cert.pem"),
+    },
+    app
+  )
+  .listen(8000, () => {
+    console.log("server is runing at port 8000");
+  });
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
   }

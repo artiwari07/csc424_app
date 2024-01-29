@@ -43,13 +43,16 @@ const App = () => {
 
 const Navigation = () => {
     const { value } = useAuth();
+    const handleSignOut = () => {
+      value.onLogout(); // Call onLogout to remove the token from cookies
+    };
     return (
       <nav>
         <NavLink to="/home">Home</NavLink>
         <NavLink to="/landing">Landing</NavLink>
         <NavLink to="/registration">Registration</NavLink>
         {value.token && (
-          <button type="button" onClick={value.onLogout}>
+          <button type="button" onClick={handleSignOut}>
             Sign Out
         </button>
     )}

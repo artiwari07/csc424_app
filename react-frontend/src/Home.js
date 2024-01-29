@@ -24,7 +24,7 @@ export const Home = () => {
         <>
             <h2>Home (Public)</h2>
             <label>
-                User:
+                Username:
                 <input
                     type="text"
                     value={username}
