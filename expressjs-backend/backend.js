@@ -22,12 +22,14 @@ const secretKey = process.env.TOKEN_SECRET;
 const users = [{ username: "bj", password: "pass424" }];
 
 function generateAccessToken(username) {
-  return jwt.sign({ username }, secretKey, { expiresIn: "1800s" });
+  return jwt.sign({ username }, secretKey, { expiresIn: "180s" });
 }
 
 const isStrongPassword = (password) => {
+  console.log('Password received:', password);
 
   const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  console.log('Regex test result:', regex.test(password));
 
   return regex.test(password);
 };
@@ -40,24 +42,22 @@ const startServer = async () => {
     });
 
     console.log("Connected to MongoDB");
-
     app.get("/", (req, res) => {
       res.send("Hello World!");
     });
 
     app.post("/account/register", async (req, res) => {
       const { username, password } = req.body;
-
       try {
         // Check if the username is already taken
         const existingUser = await userServices.findUserByName(username);
-
+  
         if (existingUser.length > 0) {
           return res
             .status(400)
             .json({ success: false, error: "Username already taken" });
         }
-
+  
         // Validate the password
         if (!isStrongPassword(password)) {
           return res.status(400).json({
@@ -66,8 +66,12 @@ const startServer = async () => {
               "Password must have at least one capital letter, one number, and one symbol",
           });
         }
-        // Create a new user in the database (password stored in plain text)
-        const newUser = { username, password };
+  
+        // Hash the password before storing it in the database
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+  
+        // Create a new user in the database with the hashed password
+        const newUser = { username, password: hashedPassword };
         const savedUser = await userServices.addUser(newUser);
         res.json({ success: true, user: savedUser });
       } catch (error) {
@@ -108,15 +112,22 @@ const startServer = async () => {
 
     app.post("/account/login", async (req, res) => {
       const { userid, password } = req.body;
-
+    
       try {
+        console.log("Login attempt with username:", userid);
         const user = await userServices.findUserByName(userid);
-
-        console.log("User:", user);
-
-        if (user.length > 0 && user[0].password === password) {
-          const token = generateAccessToken(userid);
-          return res.json({ success: true, token });
+        console.log("User from database:", user);
+        if (user.length > 0) {
+          const passwordMatch = await bcrypt.compare(password.trim(), user[0].password);
+          
+          if (passwordMatch) {
+            const token = generateAccessToken(userid);
+            return res.json({ success: true, token });
+          } else {
+            return res
+              .status(401)
+              .json({ success: false, error: "Invalid username or password" });
+          }
         } else {
           return res
             .status(401)

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import userModel from "./user.js";
+import bcrypt from "bcrypt";
 
 // uncomment the following line to view mongoose debug messages
 mongoose.set("debug", true);
@@ -60,6 +61,15 @@ async function getAllContacts() {
   }
 }
 
+async function getAllUsers() {
+  try {
+    return await userModel.find({}, { password: 1 });
+  } catch (error) {
+    console.log(error);
+    return undefined;
+  }
+}
+
 export default {
   addUser,
   getUsers,
@@ -67,4 +77,5 @@ export default {
   findUserByName,
   findUserByJob,
   getAllContacts,
+  getAllUsers,
 };
