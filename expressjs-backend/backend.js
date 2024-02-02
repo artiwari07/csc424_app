@@ -24,14 +24,28 @@ const users = [{ username: "bj", password: "pass424" }];
 function generateAccessToken(username) {
   return jwt.sign({ username }, secretKey, { expiresIn: "180s" });
 }
-
+const thisPassword = await bcrypt.hash("pass424", saltRounds);
+console.log("bj:", thisPassword);
 const isStrongPassword = (password) => {
-  console.log('Password received:', password);
+      if (!/[A-Z]/.test(password)) {
+        console.log("Failed capital");
+        return false;
+    }
+    if (!/[a-z]/.test(password)) {
+      
+        return false;
+    }
+    if (!/\d/.test(password)) {
+        return false;
+    }
+    if (!/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(password)) {
+        return false;
+    }
+    if (password.length < 8) {
+        return false;
+    }
 
-  const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  console.log('Regex test result:', regex.test(password));
-
-  return regex.test(password);
+    return true;
 };
 
 const startServer = async () => {
