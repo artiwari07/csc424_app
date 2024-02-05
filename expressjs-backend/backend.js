@@ -33,16 +33,19 @@ const isStrongPassword = (password) => {
         return false;
     }
     if (!/[a-z]/.test(password)) {
-      
+        console.log("Failed small letters");
         return false;
     }
     if (!/\d/.test(password)) {
+        console.log("Failed digit");
         return false;
     }
     if (!/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(password)) {
+        console.log("Failed special character");
         return false;
     }
     if (password.length < 8) {
+        console.log("Failed password length");
         return false;
     }
 

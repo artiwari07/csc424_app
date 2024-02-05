@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import userModel from "./user.js";
 import bcrypt from "bcrypt";
 import validator from 'validator';
+import sanitize from 'mongo-sanitize';
 
 // uncomment the following line to view mongoose debug messages
 mongoose.set("debug", true);
@@ -45,13 +46,21 @@ async function addUser(user) {
   }
 }
 
+function isValidUsername(username) {
+  // Allow only letters, numbers, and underscores
+  const re = /^[a-zA-Z0-9_]+$/;
+  return re.test(username);
+}
+
 async function findUserByName(username) {
-  if (!validator.isAlphanumeric(username)) {
+  if (!isValidUsername(username)) {
     throw new Error('Invalid username');
   }
 
-  return await userModel.find({ username: username });
+  let sanitizedUsername = sanitize(username);
+  return await userModel.find({ username: sanitizedUsername });
 }
+
 
 async function findUserByJob(job) {
   return await userModel.find({ job: job });
