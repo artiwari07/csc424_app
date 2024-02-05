@@ -1,34 +1,76 @@
-import { createContext, useContext, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { fakeAuth } from "../utils/FakeAuth";
+import React, { createContext, useContext, useReducer } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import axios from "axios";
+
 const AuthContext = createContext({});
+
+const authReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_TOKEN":
+      return { ...state, token: action.payload };
+    case "LOGOUT":
+      return { ...state, token: null };
+    default:
+      return state;
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
-  const [token, setToken] = useState(null);
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  
+  const [state, dispatch] = useReducer(authReducer, {
+    token: cookies.token || null,
+  });
 
   const handleLogin = async () => {
-    const token = await fakeAuth();
-    setToken(token);
-    navigate("/landing");
+    try {
+      const response = await axios.post("https://localhost:8000/account/login", {
+        userid: value.username,
+        password: value.password,
+      });
+
+      if (response.data.success) {
+        const token = response.data.token;
+
+        // Set the token as an HttpOnly cookie
+        setCookie("token", token, { path: "/" });
+
+        // Use dispatch to set the token in the context
+        dispatch({ type: "SET_TOKEN", payload: token });
+
+        console.log("Login successful");
+        navigate("/landing");
+        console.log("After navigation");
+      } else {
+        alert("Invalid username or password. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("An error occurred during login. Please try again.");
+    }
   };
 
   const handleLogout = () => {
-    setToken(null);
+    // Clear the token from cookies
+    removeCookie("token", { path: "/" });
+    navigate("/home");
   };
 
   const value = {
-    token,
+    token: state.token,
+    username: "",
+    password: "",
     onLogin: handleLogin,
     onLogout: handleLogout,
   };
 
   return (
-    <AuthContext.Provider value={{ value }}>
+    <AuthContext.Provider value={{ value, dispatch }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// give callers access to the context
 export const useAuth = () => useContext(AuthContext);
