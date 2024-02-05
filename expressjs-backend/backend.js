@@ -9,6 +9,7 @@ import authenticateToken from "./authMiddleware.js";
 import https from "https";
 import fs from "fs";
 import bcrypt from "bcrypt";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 const app = express();
@@ -24,8 +25,8 @@ const users = [{ username: "bj", password: "pass424" }];
 function generateAccessToken(username) {
   return jwt.sign({ username }, secretKey, { expiresIn: "180s" });
 }
-const thisPassword = await bcrypt.hash("pass424", saltRounds);
-console.log("bj:", thisPassword);
+// const thisPassword = await bcrypt.hash("pass424", saltRounds);
+// console.log("bj:", thisPassword);
 const isStrongPassword = (password) => {
       if (!/[A-Z]/.test(password)) {
         console.log("Failed capital");
@@ -48,6 +49,12 @@ const isStrongPassword = (password) => {
     return true;
 };
 
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use("/api/", apiLimiter);
+
 const startServer = async () => {
   try {
     await mongoose.connect("mongodb://127.0.0.1:27017/users", {
@@ -59,6 +66,8 @@ const startServer = async () => {
     app.get("/", (req, res) => {
       res.send("Hello World!");
     });
+
+
 
     app.post("/account/register", async (req, res) => {
       const { username, password } = req.body;

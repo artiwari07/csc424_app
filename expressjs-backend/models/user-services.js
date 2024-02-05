@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import userModel from "./user.js";
 import bcrypt from "bcrypt";
+import validator from 'validator';
 
 // uncomment the following line to view mongoose debug messages
 mongoose.set("debug", true);
@@ -45,6 +46,10 @@ async function addUser(user) {
 }
 
 async function findUserByName(username) {
+  if (!validator.isAlphanumeric(username)) {
+    throw new Error('Invalid username');
+  }
+
   return await userModel.find({ username: username });
 }
 
