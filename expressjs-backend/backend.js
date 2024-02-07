@@ -10,6 +10,8 @@ import https from "https";
 import fs from "fs";
 import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
+import authRouter from './routes/oath';
+import requestRouter from './routes/request';
 
 dotenv.config();
 const app = express();
@@ -17,6 +19,8 @@ const port = 8000;
 
 app.use(express.json());
 app.use(cors());
+app.use("/oath", authRouter);
+app.use("/request", requestRouter);
 
 const saltRounds = 10;
 const secretKey = process.env.TOKEN_SECRET;

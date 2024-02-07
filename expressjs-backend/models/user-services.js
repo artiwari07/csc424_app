@@ -47,7 +47,6 @@ async function addUser(user) {
 }
 
 function isValidUsername(username) {
-  // Allow only letters, numbers, and underscores
   const re = /^[a-zA-Z0-9_]+$/;
   return re.test(username);
 }
