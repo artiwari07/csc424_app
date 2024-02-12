@@ -39,6 +39,8 @@ export const AuthProvider = ({ children }) => {
 
       if (response.data.success) {
         const token = response.data.token;
+        console.log("token:", response.data.token);
+        setCookie("token", token, { path: "/" });
       
         // Store the regular token in local storage
       localStorage.setItem(TOKEN_KEY, token);
