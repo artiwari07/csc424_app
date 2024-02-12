@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useAuth } from "./context/AuthProvider";
 import axios from "axios";
+import { TOKEN_KEY, INVALID_TOKEN } from './context/constants';
 
 export const Landing = () => {
   const { value, dispatch } = useAuth();
@@ -9,17 +10,40 @@ export const Landing = () => {
   const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
+    const handleToken = (token) => {
+      if (token) {
+        // Update the context with the token
+        dispatch({ type: "SET_GOOGLE_TOKEN", payload: token });
+  
+        // Store the token in cookies
+        setCookie("token", token, { path: "/" });
+      }
+    };
+  
     // Check for the stored token
     const storedToken = cookies.token;
-
-    if (storedToken && storedToken.trim() !== "") {
+    const tokenFromLocalStorage = localStorage.getItem(TOKEN_KEY);
+  
+    if ((storedToken && storedToken.trim() !== "") || (tokenFromLocalStorage && tokenFromLocalStorage !== INVALID_TOKEN)) {
       // Update the context with the stored token
       dispatch({ type: "SET_TOKEN", payload: storedToken });
-
-      // Fetch contacts using the token
+  
+      // Fetch contacts using the stored token
       fetchContacts(storedToken);
+    } else {
+      // If the token is invalid or not present, navigate to the home page
+      window.location.href = "/home";
     }
-  }, [cookies.token, dispatch]);
+  
+    // Retrieve the Google token from the URL
+    const queryParameters = new URLSearchParams(window.location.search);
+    const google_token = queryParameters.get("token");
+  
+    // Handle Google token
+    handleToken(google_token);
+  
+  }, [cookies.token, dispatch, setCookie]);
+  
 
   const handleLogout = () => {
     // Clear the token from cookies and update context
@@ -27,30 +51,40 @@ export const Landing = () => {
     dispatch({ type: "LOGOUT" });
   };
 
-  const fetchContacts = async (token) => {
+  const fetchContacts = async () => {
+    const tokenToUse = value.token || cookies.token;
+  
     try {
-      const response = await axios.get("https://localhost:8000/api/contacts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data.success) {
-        // Update the contacts state with the fetched data
-        setContacts(response.data.contacts);
+      if (tokenToUse) {
+        const response = await axios.get("https://localhost:8000/api/contacts", {
+          headers: {
+            Authorization: `Bearer ${tokenToUse}`,
+          },
+        });
+  
+        if (response.data.success) {
+          // Update the contacts state with the fetched data
+          setContacts(response.data.contacts);
+        } else {
+          console.error("Error fetching contacts:", response.data.error);
+        }
       } else {
-        console.error("Error fetching contacts:", response.data.error);
+        // Handle the case where the token is missing or invalid
+        console.error("Token is missing or invalid");
+        // You might want to redirect the user or handle this case as per your application's requirements
       }
     } catch (error) {
       console.error("Error fetching contacts:", error);
+      // Handle other errors as needed
     }
   };
+  
 
   return (
     <>
       <h2>Landing (Protected)</h2>
-      {value.token ? (
-        <>
+      {(value.token || cookies.token) ? (
+      <>
           {/* <button onClick={handleLogout}>Logout</button> */}
 
           <div>

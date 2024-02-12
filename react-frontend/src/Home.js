@@ -18,7 +18,6 @@ export const Home = () => {
         value.password = password;
         return value.onLogin();
     }
-    
 
     return (
         <>

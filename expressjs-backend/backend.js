@@ -9,6 +9,8 @@ import authenticateToken from "./authMiddleware.js";
 import https from "https";
 import fs from "fs";
 import bcrypt from "bcrypt";
+import authRouter from "./routes/oath.js";
+import requestRouter from "./routes/request.js";
 
 dotenv.config();
 const app = express();
@@ -16,6 +18,8 @@ const port = 8000;
 
 app.use(express.json());
 app.use(cors());
+app.use("/oath", authRouter);
+app.use("/request", requestRouter);
 
 const saltRounds = 10;
 const secretKey = process.env.TOKEN_SECRET;
@@ -24,8 +28,7 @@ const users = [{ username: "bj", password: "pass424" }];
 function generateAccessToken(username) {
   return jwt.sign({ username }, secretKey, { expiresIn: "180s" });
 }
-const thisPassword = await bcrypt.hash("pass424", saltRounds);
-console.log("bj:", thisPassword);
+
 const isStrongPassword = (password) => {
       if (!/[A-Z]/.test(password)) {
         console.log("Failed capital");
