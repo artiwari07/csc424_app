@@ -1,9 +1,18 @@
 import express from 'express';
-const router = express.Router();
-
+import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
 
+dotenv.config();
+const router = express.Router();
+
+
+
 import { OAuth2Client } from 'google-auth-library';
+const secretKey = process.env.TOKEN_SECRET;
+
+function generateAccessToken(username) {
+  return jwt.sign({ username }, secretKey, { expiresIn: "180s" });
+}
 
 async function getUserData(access_token) {
 
@@ -16,6 +25,7 @@ async function getUserData(access_token) {
     const data = await response.json();
   
     console.log("data", data);
+    return data
   
   }
   
@@ -36,17 +46,19 @@ async function getUserData(access_token) {
       await oAuth2Client.setCredentials(result.tokens);
       const user = oAuth2Client.credentials;
       // show data that is returned from the Google call
-      await getUserData(user.access_token);
+      // console.log("user", user);
+      const info = await getUserData(user.access_token);
   
           
      // call your code to generate a new JWT from your backend, don't reuse Googles
   
-     token = generateJWT(user.appUser.userid);
-      res.redirect(303, `http://localhost:3000/token=${token}`);
+     const token = generateAccessToken(info.name);
+      // res.redirect(303, `https://localhost:3000/token=${token}`);
+      res.redirect(303, `https://localhost:3000/landing/token=${token}`);
   
       } catch (err) {
              console.log("Error with signin with Google", err);
-             res.redirect(303, "http://localhost:3000/");
+             res.redirect(303, "https://localhost:3000/");
     }
   
   });

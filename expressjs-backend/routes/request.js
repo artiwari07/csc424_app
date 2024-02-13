@@ -11,7 +11,7 @@ router.post("/", async function (req, res, next) {
   
     res.header("Referrer-Policy", "no-referrer-when-downgrade"); // needed for http
   
-    const redirectUrl = "http://127.0.0.1:8000/oath";
+    const redirectUrl = "https://127.0.0.1:8000/oath";
   
     const oAuth2Client = new OAuth2Client(
   

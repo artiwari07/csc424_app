@@ -19,6 +19,25 @@ export const Landing = () => {
         setCookie("token", token, { path: "/" });
       }
     };
+    const handleGoogleLogin = async (googleToken) => {
+      try {
+        // Store the Google token in local storage
+        localStorage.setItem(TOKEN_KEY, googleToken);
+        // Use dispatch to set the Google token in the context
+        dispatch({ type: "SET_GOOGLE_TOKEN", payload: googleToken });
+        console.log("Google login successful");
+        console.log("After navigation");
+      } catch (error) {
+        console.error("Error during Google login:", error);
+      }
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const googleToken = urlParams.get('token');
+    if (googleToken) {
+        handleGoogleLogin(googleToken);
+      }
+    
   
     // Check for the stored token
     const storedToken = cookies.token;

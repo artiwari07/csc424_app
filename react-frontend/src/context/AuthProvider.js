@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import axios from "axios";
@@ -43,27 +43,52 @@ export const AuthProvider = ({ children }) => {
         setCookie("token", token, { path: "/" });
       
         // Store the regular token in local storage
-      localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(TOKEN_KEY, token);
 
-      // Use dispatch to set the regular token in the context
-      dispatch({ type: "SET_TOKEN", payload: token });
+        // Use dispatch to set the regular token in the context
+        dispatch({ type: "SET_TOKEN", payload: token });
 
-      // If there is a Google token, set it in the context as well
-      if (state.googleToken) {
-        dispatch({ type: "SET_GOOGLE_TOKEN", payload: state.googleToken });
+        // If there is a Google token, set it in the context as well
+        if (state.googleToken) {
+          dispatch({ type: "SET_GOOGLE_TOKEN", payload: state.googleToken });
+        }
+
+        console.log("Login successful");
+        navigate("/landing");
+        console.log("After navigation");
+      } else {
+        alert("Invalid username or password. Please try again.");
       }
+    }  catch (error) {
+        console.error("Error during login:", error);
+        alert("An error occurred during login. Please try again.");
+      }
+  };
 
-      console.log("Login successful");
+  const handleGoogleLogin = async (googleToken) => {
+    try {
+      // Store the Google token in local storage
+      localStorage.setItem(TOKEN_KEY, googleToken);
+
+      // Use dispatch to set the Google token in the context
+      dispatch({ type: "SET_GOOGLE_TOKEN", payload: googleToken });
+
+      console.log("Google login successful");
       navigate("/landing");
       console.log("After navigation");
-    } else {
-      alert("Invalid username or password. Please try again.");
-    }
-  }  catch (error) {
-      console.error("Error during login:", error);
-      alert("An error occurred during login. Please try again.");
+    } catch (error) {
+      console.error("Error during Google login:", error);
     }
   };
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const googleToken = urlParams.get('token');
+
+    if (googleToken) {
+      handleGoogleLogin(googleToken);
+    }
+  }, []);
 
   const handleLogout = () => {
     // Clear the token from local storage
