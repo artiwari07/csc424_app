@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useAuth } from "./context/AuthProvider";
 import axios from "axios";
-import { TOKEN_KEY, INVALID_TOKEN } from './context/constants';
 
+const TOKEN_KEY = "JWT_AUTH_TOKEN";
+const INVALID_TOKEN = "INVALID_TOKEN";
+const queryParameters = new URLSearchParams(window.location.search);
+const google_token = queryParameters.get("token");
+console.log("Landing google token", google_token);
 export const Landing = () => {
   const { value, dispatch } = useAuth();
   const [cookies, setCookie] = useCookies(["token"]);
