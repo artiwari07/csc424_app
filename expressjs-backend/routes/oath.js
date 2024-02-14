@@ -54,7 +54,7 @@ async function getUserData(access_token) {
   
      const token = generateAccessToken(info.name);
       // res.redirect(303, `https://localhost:3000/token=${token}`);
-      res.redirect(303, `https://localhost:3000/landing/token=${token}`);
+      res.redirect(303, `https://localhost:3000/landing?token=${token}`);
   
       } catch (err) {
              console.log("Error with signin with Google", err);
