@@ -11,7 +11,8 @@ import { OAuth2Client } from 'google-auth-library';
 const secretKey = process.env.TOKEN_SECRET;
 
 function generateAccessToken(username) {
-  return jwt.sign({ username }, secretKey, { expiresIn: "180s" });
+  // return jwt.sign({ username }, secretKey, { expiresIn: "18000s" });
+  return jwt.sign({ username }, secretKey);
 }
 
 async function getUserData(access_token) {

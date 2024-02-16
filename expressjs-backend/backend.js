@@ -26,7 +26,8 @@ const secretKey = process.env.TOKEN_SECRET;
 const users = [{ username: "bj", password: "pass424" }];
 
 function generateAccessToken(username) {
-  return jwt.sign({ username }, secretKey, { expiresIn: "18000s" });
+  // return jwt.sign({ username }, secretKey, { expiresIn: "18000s" });
+  return jwt.sign({ username }, secretKey);
 }
 
 const isStrongPassword = (password) => {
