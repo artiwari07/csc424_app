@@ -50,7 +50,8 @@ export const Landing = () => {
     if ((storedToken && storedToken.trim() !== "") || (tokenFromLocalStorage && tokenFromLocalStorage !== INVALID_TOKEN)) {
       // Update the context with the stored token
       dispatch({ type: "SET_TOKEN", payload: storedToken });
-  
+      console.log("storedToken:", storedToken);
+      console.log("tokenFromLocalStorage:", tokenFromLocalStorage);
       // Fetch contacts using the stored token
       fetchContacts(storedToken);
     } else {
@@ -76,7 +77,7 @@ export const Landing = () => {
 
   const fetchContacts = async () => {
     const tokenToUse = value.token || cookies.token;
-  
+    console.log("tokenToUse:", tokenToUse);
     try {
       if (tokenToUse) {
         const response = await axios.get("https://localhost:8000/api/contacts", {
