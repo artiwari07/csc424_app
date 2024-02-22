@@ -11,7 +11,7 @@ export const Registration = () => {
 
     const handleRegistration = async () => {
         try {
-            const response = await axios.post("http://localhost:8000/account/register", {
+            const response = await axios.post("https://localhost:8000/account/register", {
                 username,
                 password,
                 confirmPassword
